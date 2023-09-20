@@ -1,2 +1,2 @@
 # IpCalc
-My CMD implementation of ipcalc.
+My C++ CMD implementation of ipcalc.
