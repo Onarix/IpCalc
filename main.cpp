@@ -1,7 +1,6 @@
 #include <iostream>
 #include <regex>
 #include "functions.hpp"
-#define SPACE "                "
 
 int main(int argc, char **argv)
 {
@@ -34,8 +33,8 @@ int main(int argc, char **argv)
     //  TODO: all ipcalc functionalities, text formatting (cout formatting), possibility of checking the mask, etc.
     else
     {
-        std::cout << "Address: " << IP << SPACE << "a" << std::endl;
-        std::cout << "Bitwise Representation: " << ipToBits(IP) << std::endl;
+        std::cout << "Address: " << IP << "\n";
+        std::cout << " Bitwise Representation: " << ipToBits(IP) << std::endl;
     }
 
     return 0;
