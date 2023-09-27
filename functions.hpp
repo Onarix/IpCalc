@@ -1,11 +1,21 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
-// TODO: Maybe implement a class FUNCTIONS, with static functions (so octetToBits will be unavailible to main indirectly)
+
 #include <algorithm>
 #include <string>
 
+// Class "Functions" helps to keep encapsulation (main.cpp doesn't need octetToBits)
+class Functions {
+
+public:
+    static std::string ipToBits(const std::string &IP);
+
+private:
+    static std::string octetToBits(const std::string &octet);
+};
+
 //  convert decimal representation of octet to binary
-std::string octetToBits(const std::string &octet) {
+std::string Functions::octetToBits(const std::string &octet) {
     int _octet = std::stoi(octet);
     std::string bits = "";
     while (_octet > 0) {
@@ -29,7 +39,7 @@ std::string octetToBits(const std::string &octet) {
 }
 
 //  convert decimal IP to binary
-std::string ipToBits(const std::string &IP) {
+std::string Functions::ipToBits(const std::string &IP) {
     std::string bits = "";
     int i = 0;
     int dot = 0;
