@@ -5,6 +5,8 @@
 #include <cmath>
 #include <string>
 
+#define NUM_MASK IP.substr(IP.find_first_of('/', 0) + 1, IP.length() - IP.find_first_of('/', 0))
+
 // Class "Functions" helps to keep encapsulation (main.cpp doesn't need octetToBits)
 class Functions {
 
@@ -12,10 +14,18 @@ public:
     static std::string ipToBits(const std::string &IP);
     static std::string getNetmask(int mask);
     static std::string getWildcard(int mask);
+    static std::string getNetwork(const std::string &IP);
+
+    // TODO: all functions down below
+    static std::string getBroadcast(const std::string &IP); // binary: wildcard OR address
+    static std::string getHostMin();
+    static std::string getHostMax();
+    static unsigned int Hosts();
 
 private:
     static std::string octetToBits(const std::string &octet);
     static std::string reverseOctets(const std::string &IP);
+    static std::string ipBitsToDecimal(const std::string &IP);
 };
 
 /// @brief converts decimal representation of octet to binary
@@ -67,35 +77,74 @@ inline std::string Functions::ipToBits(const std::string &IP) {
 /// @return netmask address (ex. 255.255.255.0)
 inline std::string Functions::getNetmask(int mask) {
     std::string netmask = "";
-    int currOctet = 0;
-    while (mask > 0) {
-        if (mask >= 8) {
-            netmask += "255.";
-            mask -= 8;
-            currOctet++;
+
+    for (int i = 0; i < 35; i++) {
+        if (i == 8 or i == 17 or i == 26) {
+            netmask += '.';
+        } else if (mask == 0) {
+            netmask += '0';
         } else {
-            netmask += std::to_string(pow(2, mask)) + ".";
-            currOctet++;
-            break;
+            netmask += '1';
+            mask--;
         }
     }
 
-    while (currOctet < 4) {
-        netmask += "0.";
-        currOctet++;
-    }
-
-    netmask.pop_back();
-
-    return netmask;
+    return ipBitsToDecimal(netmask);
 }
 
 /// @brief get wildcard address from mask number (ex. /24 => 0.0.0.255)
 /// @param mask number of mask (ex. 24)
 /// @return wildcard address
 inline std::string Functions::getWildcard(int mask) {
-    std::string wildcard = getNetmask(32 - mask);
-    return reverseOctets(wildcard);
+    std::string wildcard = ipToBits(getNetmask(32 - mask));
+    std::reverse(wildcard.begin(), wildcard.end());
+    return ipBitsToDecimal(wildcard);
+}
+
+/// @brief returns IP of network in which host is
+/// @param IP - address of host
+/// @return address of network
+inline std::string Functions::getNetwork(const std::string &IP) {
+    std::string network = "";
+    std::string host = Functions::ipToBits(IP.substr(0, IP.find_first_of('/', 0)));
+    std::string netmask = Functions::ipToBits(Functions::getNetmask(std::stoi(NUM_MASK)));
+
+    for (int i = 0; i < host.length(); i++) {
+        if (host[i] == '.')
+            network += '.';
+        else if ((int(host[i]) - '0') & (int(netmask[i]) - '0'))
+            network += '1';
+        else
+            network += '0';
+    }
+
+    return ipBitsToDecimal(network) + "/" + NUM_MASK;
+}
+
+/// @brief Transforms Binary representation of IP into decimal
+/// @param IP binary decimal address
+/// @return decimal IP address
+inline std::string Functions::ipBitsToDecimal(const std::string &IP) {
+    std::string decimal = "";
+    int octetDec = 0;
+    int pos = 0;
+    std::string curr = "";
+
+    for (int i = IP.length() - 1; i >= 0; i--) {
+        if (IP[i] == '.') {
+            decimal += std::to_string(octetDec) + '.';
+            octetDec = 0;
+            pos = 0;
+        } else {
+            curr.push_back(IP[i]);
+            octetDec += pow(2, pos) * std::stoi(curr);
+            curr = "";
+            pos++;
+        }
+    }
+    decimal += std::to_string(octetDec);
+
+    return reverseOctets(decimal);
 }
 
 /// @brief reverses octets in IP address
@@ -104,15 +153,15 @@ inline std::string Functions::getWildcard(int mask) {
 inline std::string Functions::reverseOctets(const std::string &IP) {
     std::string octet[4] = {};
     int j = 0;
-    // int dot = 0;
+    int oct = 0;
 
-    for (int i = 0; i < IP.length(); i++) {
-        octet[j] = IP.substr(i, IP.find_first_of('.', i) - i);
-        i = IP.find_first_of('.', i);
-        j++;
+    while (oct < 4) {
+        octet[oct] = IP.substr(j, IP.find_first_of('.', j) - j);
+        j = IP.find_first_of('.', j) + 1;
+        oct++;
     }
 
-    return octet[3] + octet[2] + octet[1] + octet[0];
+    return octet[3] + "." + octet[2] + "." + octet[1] + "." + octet[0];
 }
 
 #endif
