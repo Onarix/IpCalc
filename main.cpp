@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
         std::cout << "Invalid IP address!" << std::endl;
     }
 
-    //  TODO: fix cout formatting, fix wildcard function (reverseOctet) functionalities: network, broadcast, host min, host max, hosts/net
+    //  TODO: fix cout formatting, functionalities: broadcast, host min, host max, hosts/net
 
     //  without providing network mask
     else if (IP.find_first_of('/', 0) == IP.npos) {
@@ -40,6 +40,8 @@ int main(int argc, char **argv) {
         std::cout << std::right << "Address: " + IP.substr(0, IP.find_first_of('/', 0)) << std::setw(13) << " " << std::setw(1) << Functions::ipToBits(IP) << std::endl;
         std::cout << std::right << "Netmask: " + Functions::getNetmask(std::stoi(NUM_MASK)) + " = " + NUM_MASK << std::setw(13) << " " << std::setw(1) << Functions::ipToBits(Functions::getNetmask(std::stoi(NUM_MASK))) << std::endl;
         std::cout << std::right << "Wildcard: " + Functions::getWildcard(std::stoi(NUM_MASK)) << std::setw(13) << " " << std::setw(1) << Functions::ipToBits(Functions::getWildcard(std::stoi(NUM_MASK))) << std::endl;
+        std::cout << std::right << "=>" << std::endl;
+        std::cout << std::right << "Network: " + Functions::getNetwork(IP) << std::setw(13) << " " << std::setw(1) << Functions::ipToBits(Functions::getNetwork(IP)) << std::endl;
     }
 
     return 0;
