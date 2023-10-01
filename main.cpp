@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
         std::cout << "Invalid IP address!" << std::endl;
     }
 
-    //  TODO: fix cout formatting, functionalities: broadcast, host min, host max, hosts/net
+    //  TODO: fix cout formatting
 
     //  without providing network mask
     else if (IP.find_first_of('/', 0) == IP.npos) {
@@ -42,6 +42,10 @@ int main(int argc, char **argv) {
         std::cout << std::right << "Wildcard: " + Functions::getWildcard(std::stoi(NUM_MASK)) << std::setw(13) << " " << std::setw(1) << Functions::ipToBits(Functions::getWildcard(std::stoi(NUM_MASK))) << std::endl;
         std::cout << std::right << "=>" << std::endl;
         std::cout << std::right << "Network: " + Functions::getNetwork(IP) << std::setw(13) << " " << std::setw(1) << Functions::ipToBits(Functions::getNetwork(IP)) << std::endl;
+        std::cout << std::right << "Broadcast: " + Functions::getBroadcast(IP) << std::setw(13) << " " << std::setw(1) << Functions::ipToBits(Functions::getBroadcast(IP)) << std::endl;
+        std::cout << std::right << "Host min: " + Functions::getHostMin(IP) << std::setw(13) << " " << std::setw(1) << Functions::ipToBits(Functions::getHostMin(IP)) << std::endl;
+        std::cout << std::right << "Host max: " + Functions::getHostMax(IP) << std::setw(13) << " " << std::setw(1) << Functions::ipToBits(Functions::getHostMax(IP)) << std::endl;
+        std::cout << std::right << "Hosts/Net: " << Functions::Hosts(std::stoi(NUM_MASK)) << std::endl;
     }
 
     return 0;
