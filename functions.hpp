@@ -7,7 +7,7 @@
 
 #define NUM_MASK IP.substr(IP.find_first_of('/', 0) + 1, IP.length() - IP.find_first_of('/', 0))
 
-// Class "Functions" helps to keep encapsulation (main.cpp doesn't need octetToBits)
+// Class "Functions" helps to keep encapsulation (ex. main.cpp doesn't need octetToBits)
 class Functions {
 
 public:
@@ -15,12 +15,10 @@ public:
     static std::string getNetmask(int mask);
     static std::string getWildcard(int mask);
     static std::string getNetwork(const std::string &IP);
-
-    // TODO: all functions down below
-    static std::string getBroadcast(const std::string &IP); // binary: wildcard OR address
-    static std::string getHostMin();
-    static std::string getHostMax();
-    static unsigned int Hosts();
+    static std::string getBroadcast(const std::string &IP);
+    static std::string getHostMin(const std::string &IP);
+    static std::string getHostMax(const std::string &IP);
+    static unsigned int Hosts(int mask);
 
 private:
     static std::string octetToBits(const std::string &octet);
@@ -106,8 +104,8 @@ inline std::string Functions::getWildcard(int mask) {
 /// @return address of network
 inline std::string Functions::getNetwork(const std::string &IP) {
     std::string network = "";
-    std::string host = Functions::ipToBits(IP.substr(0, IP.find_first_of('/', 0)));
-    std::string netmask = Functions::ipToBits(Functions::getNetmask(std::stoi(NUM_MASK)));
+    std::string host = ipToBits(IP.substr(0, IP.find_first_of('/', 0)));
+    std::string netmask = ipToBits(getNetmask(std::stoi(NUM_MASK)));
 
     for (int i = 0; i < host.length(); i++) {
         if (host[i] == '.')
@@ -119,6 +117,64 @@ inline std::string Functions::getNetwork(const std::string &IP) {
     }
 
     return ipBitsToDecimal(network) + "/" + NUM_MASK;
+}
+
+/// @brief returns broadcast of provied IP host address
+/// @param IP host address
+/// @return broadcast address
+inline std::string Functions::getBroadcast(const std::string &IP) {
+    std::string broadcast = "";
+    std::string host = ipToBits(IP.substr(0, IP.find_first_of('/', 0)));
+    std::string wildcard = ipToBits(getWildcard(std::stoi(NUM_MASK)));
+
+    for (int i = 0; i < host.length(); i++) {
+        if (host[i] == '.')
+            broadcast += '.';
+        else if ((int(host[i]) - '0') | (int(wildcard[i]) - '0'))
+            broadcast += '1';
+        else
+            broadcast += '0';
+    }
+
+    return ipBitsToDecimal(broadcast);
+}
+
+/// @brief returns first accessible host address from IP network
+/// @param IP IP host address
+/// @return first accessible host address from IP network
+inline std::string Functions::getHostMin(const std::string &IP) {
+    std::string hmin = getNetwork(IP);
+    hmin = hmin.substr(0, hmin.find_first_of('/', 0));
+    int lastOct = std::stoi(hmin.substr(hmin.find_last_of('.', hmin.length() - 1) + 1));
+
+    if (lastOct < 255)
+        lastOct++;
+
+    hmin.replace(hmin.find_last_of('.', hmin.length() - 1) + 1, hmin.length() - hmin.find_last_of('.', hmin.length() - 1) + 1, std::to_string(lastOct));
+
+    return hmin;
+}
+
+/// @brief returns last accessible host address from IP network
+/// @param IP IP host address
+/// @return last accessible host address from IP network
+inline std::string Functions::getHostMax(const std::string &IP) {
+    std::string hmax = getBroadcast(IP);
+    int lastOct = std::stoi(hmax.substr(hmax.find_last_of('.', hmax.length() - 1) + 1));
+
+    if (lastOct > 0)
+        lastOct--;
+
+    hmax.replace(hmax.find_last_of('.', hmax.length() - 1) + 1, hmax.length() - hmax.find_last_of('.', hmax.length() - 1) + 1, std::to_string(lastOct));
+
+    return hmax;
+}
+
+/// @brief returns the amount of hosts the network can contain
+/// @param mask mask of the network
+/// @return maximum amount of hosts
+unsigned int Functions::Hosts(int mask) {
+    return pow(2, 32 - mask) - 2;
 }
 
 /// @brief Transforms Binary representation of IP into decimal
